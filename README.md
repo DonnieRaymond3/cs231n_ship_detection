@@ -4,8 +4,7 @@ This repository supports **ship detection and instance segmentation** in **synth
 
 The repo currently contains **datasets plus SSDD helper scripts**.
 
-SAR scenes are often stored as **3-channel JPEG** files so standard vision tooling (OpenCV, COCO loaders) can read them, even when the underlying signal is grayscale.
----
+## SAR scenes are often stored as **3-channel JPEG** files so standard vision tooling (OpenCV, COCO loaders) can read them, even when the underlying signal is grayscale.
 
 ## Repository layout
 
@@ -42,18 +41,22 @@ flowchart TB
   v1 --> voc[voc_style + coco_style]
 ```
 
+
+
 ---
 
 ## Quick start:
 
-| Goal | Path |
-|------|------|
-| Full HRSID (all images + labels) | `HRSID/HRSID_JPG/JPEGImages/` + `HRSID/HRSID_JPG/annotations/train_test2017.json` |
-| HRSID official train / test split | `train2017.json` (3,642 images) + `test2017.json` (1,962 images) under `HRSID/HRSID_JPG/annotations/` |
-| SSDD, horizontal boxes only | `SSDD/BBox_SSDD/voc_style/` or `SSDD/BBox_SSDD/coco_style/` |
-| SSDD, rotated boxes + masks | `SSDD/BBox_RBox_PSeg_SSDD/` |
-| Explore richest SSDD labels | `SSDD/BBox_RBox_PSeg_SSDD/voc_style/` |
-| Visualize SSDD (COCO) | `cd SSDD/BBox_SSDD/coco_style` then run `visualization_coco.py` (see [Utility scripts](#utility-scripts)) |
+
+| Goal                              | Path                                                                                                      |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Full HRSID (all images + labels)  | `HRSID/HRSID_JPG/JPEGImages/` + `HRSID/HRSID_JPG/annotations/train_test2017.json`                         |
+| HRSID official train / test split | `train2017.json` (3,642 images) + `test2017.json` (1,962 images) under `HRSID/HRSID_JPG/annotations/`     |
+| SSDD, horizontal boxes only       | `SSDD/BBox_SSDD/voc_style/` or `SSDD/BBox_SSDD/coco_style/`                                               |
+| SSDD, rotated boxes + masks       | `SSDD/BBox_RBox_PSeg_SSDD/`                                                                               |
+| Explore richest SSDD labels       | `SSDD/BBox_RBox_PSeg_SSDD/voc_style/`                                                                     |
+| Visualize SSDD (COCO)             | `cd SSDD/BBox_SSDD/coco_style` then run `visualization_coco.py` (see [Utility scripts](#utility-scripts)) |
+
 
 ---
 
@@ -61,27 +64,31 @@ flowchart TB
 
 ### SSDD — complete (vendored)
 
-| Item | Count / location |
-|------|------------------|
-| Images per variant | **1,160** in `voc_style/JPEGImages/` |
-| Train / test (VOC) | **928** / **232** in `Annotations_train/`, `Annotations_test/` |
+
+| Item                    | Count / location                                                              |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| Images per variant      | **1,160** in `voc_style/JPEGImages/`                                          |
+| Train / test (VOC)      | **928** / **232** in `Annotations_train/`, `Annotations_test/`                |
 | Test inshore / offshore | **46** / **186** in `Annotations_test_inshore/`, `Annotations_test_offshore/` |
-| Full-set VOC XML | `Annotations/` (all 1,160) |
-| COCO JSON | `coco_style/annotations/{train,test,test_inshore,test_offshore}.json` |
-| COCO images | `coco_style/images/{train,test,test_inshore,test_offshore}/` |
-| Image list files | `voc_style/ImageSets/Main/{train,test,test_inshore,test_offshore}.txt` |
+| Full-set VOC XML        | `Annotations/` (all 1,160)                                                    |
+| COCO JSON               | `coco_style/annotations/{train,test,test_inshore,test_offshore}.json`         |
+| COCO images             | `coco_style/images/{train,test,test_inshore,test_offshore}/`                  |
+| Image list files        | `voc_style/ImageSets/Main/{train,test,test_inshore,test_offshore}.txt`        |
+
 
 Approximate on-disk size under `SSDD/`: **~1.1 GB** (images are duplicated across the four variants).
 
 ### HRSID — use `HRSID_JPG/`
 
-| Item | Count / location |
-|------|------------------|
-| Images | **5,604** `.jpg` files in `HRSID/HRSID_JPG/JPEGImages/` |
+
+| Item                  | Count / location                                            |
+| --------------------- | ----------------------------------------------------------- |
+| Images                | **5,604** `.jpg` files in `HRSID/HRSID_JPG/JPEGImages/`     |
 | Full COCO annotations | `train_test2017.json` — 5,604 images, 16,951 ship instances |
-| Train split | `train2017.json` — 3,642 images, 11,047 instances |
-| Test split | `test2017.json` — 1,962 images, 5,922 instances |
-| Single category | `ship` |
+| Train split           | `train2017.json` — 3,642 images, 11,047 instances           |
+| Test split            | `test2017.json` — 1,962 images, 5,922 instances             |
+| Single category       | `ship`                                                      |
+
 
 **Canonical layout:** always prefer `HRSID/HRSID_JPG/` for training and evaluation.
 
@@ -136,14 +143,16 @@ Each `file_name` (e.g. `P0001_0_800_10190_10990.jpg`) must exist in `HRSID_JPG/J
 
 Under each variant’s `voc_style/`:
 
-| Directory | Purpose |
-|-----------|---------|
-| `JPEGImages/` | `000001.jpg` … `001160.jpg` |
-| `Annotations/` | XML for all 1,160 images |
-| `Annotations_train/` | Train split XML (928) |
-| `Annotations_test/` | Test split XML (232) |
-| `Annotations_test_inshore/` | Inshore test subset (46) |
-| `Annotations_test_offshore/` | Offshore test subset (186) |
+
+| Directory                    | Purpose                     |
+| ---------------------------- | --------------------------- |
+| `JPEGImages/`                | `000001.jpg` … `001160.jpg` |
+| `Annotations/`               | XML for all 1,160 images    |
+| `Annotations_train/`         | Train split XML (928)       |
+| `Annotations_test/`          | Test split XML (232)        |
+| `Annotations_test_inshore/`  | Inshore test subset (46)    |
+| `Annotations_test_offshore/` | Offshore test subset (186)  |
+
 
 Example axis-aligned box (`BBox_SSDD`):
 
@@ -174,17 +183,19 @@ Run visualization from the `coco_style` directory so relative paths in scripts r
 
 All four subfolders share the same image IDs; choose based on the label geometry you need.
 
-| Subfolder | Labels |
-|-----------|--------|
-| `BBox_SSDD` | Axis-aligned bounding boxes |
-| `RBox_SSDD` | Rotated bounding boxes |
-| `PSeg_SSDD` | Polygon instance segmentation |
+
+| Subfolder             | Labels                                               |
+| --------------------- | ---------------------------------------------------- |
+| `BBox_SSDD`           | Axis-aligned bounding boxes                          |
+| `RBox_SSDD`           | Rotated bounding boxes                               |
+| `PSeg_SSDD`           | Polygon instance segmentation                        |
 | `BBox_RBox_PSeg_SSDD` | Bounding boxes, rotated boxes, and polygons together |
+
 
 **Recommendation**
 
-- **`BBox_SSDD`** — standard horizontal-box detectors (Faster R-CNN, YOLO-style heads, etc.).
-- **`BBox_RBox_PSeg_SSDD`** — exploration, rotated-box methods, or mask-based instance segmentation.
+- `**BBox_SSDD`** — standard horizontal-box detectors (Faster R-CNN, YOLO-style heads, etc.).
+- `**BBox_RBox_PSeg_SSDD**` — exploration, rotated-box methods, or mask-based instance segmentation.
 
 Internal layout per variant:
 
@@ -213,13 +224,15 @@ Scripts ship with the upstream SSDD release. They assume you run them from the d
 
 ### `voc_style/` (per SSDD variant)
 
-| Script | Variant | Purpose |
-|--------|---------|---------|
-| `analyze_bbox.py` | `BBox_SSDD`, `BBox_RBox_PSeg_SSDD` | Statistics / plots for axis-aligned boxes |
-| `analyze_rbox.py` | `RBox_SSDD`, `BBox_RBox_PSeg_SSDD` | Rotated-box statistics |
-| `analyze_pseg.py` | `PSeg_SSDD`, `BBox_RBox_PSeg_SSDD` | Segmentation statistics |
-| `label_on_images.py` | All | Overlay labels on images |
-| `convert2voc.py` | All | Build VOC XML from CSV label files |
+
+| Script               | Variant                            | Purpose                                   |
+| -------------------- | ---------------------------------- | ----------------------------------------- |
+| `analyze_bbox.py`    | `BBox_SSDD`, `BBox_RBox_PSeg_SSDD` | Statistics / plots for axis-aligned boxes |
+| `analyze_rbox.py`    | `RBox_SSDD`, `BBox_RBox_PSeg_SSDD` | Rotated-box statistics                    |
+| `analyze_pseg.py`    | `PSeg_SSDD`, `BBox_RBox_PSeg_SSDD` | Segmentation statistics                   |
+| `label_on_images.py` | All                                | Overlay labels on images                  |
+| `convert2voc.py`     | All                                | Build VOC XML from CSV label files        |
+
 
 Example:
 
@@ -230,11 +243,13 @@ python analyze_bbox.py
 
 ### `coco_style/` (`BBox_SSDD` and `BBox_RBox_PSeg_SSDD`)
 
-| Script | Purpose |
-|--------|---------|
+
+| Script                  | Purpose                                            |
+| ----------------------- | -------------------------------------------------- |
 | `visualization_coco.py` | Load COCO JSON and display images with annotations |
-| `plot_polylines.py` | Plot polygon segmentations |
-| `images/get_id.py` | Helper for image IDs |
+| `plot_polylines.py`     | Plot polygon segmentations                         |
+| `images/get_id.py`      | Helper for image IDs                               |
+
 
 Example (requires `pycocotools`, `scikit-image`, `matplotlib`):
 
@@ -242,24 +257,6 @@ Example (requires `pycocotools`, `scikit-image`, `matplotlib`):
 cd SSDD/BBox_SSDD/coco_style
 python visualization_coco.py
 ```
-
----
-
-## Download and setup
-
-### SSDD
-
-The full SSDD release is included in this repository. After cloning, run the [verification commands](#verify-datasets-on-disk) above. No extra download is required if counts match.
-
-### HRSID
-
-If `HRSID/HRSID_JPG/JPEGImages/` is missing or incomplete:
-
-1. Download the JPG pack from the links in [HRSID/README.md](HRSID/README.md) (Google Drive or Baidu).
-2. Extract so images live in `HRSID/HRSID_JPG/JPEGImages/`.
-3. Place COCO JSON files in `HRSID/HRSID_JPG/annotations/` (`train2017.json`, `test2017.json`, `train_test2017.json`).
-
-Do not train on `HRSID/annotations/` alone—that tree is a partial legacy copy.
 
 ---
 
@@ -279,20 +276,12 @@ This tree follows the public **SAR Ship Detection Dataset (SSDD)** layout (VOC a
 
 ---
 
-## Suggested next steps (course project)
-
-- Wire a PyTorch or TensorFlow `Dataset` to `HRSID/HRSID_JPG` (COCO API) or `SSDD/BBox_SSDD/voc_style` (VOC XML).
-- Add a root-level `requirements.txt` when you add training code (`pycocotools`, `opencv-python`, `torch`, etc.).
-- Keep train/val splits consistent: use SSDD `ImageSets/Main/` or HRSID `train2017.json` / `test2017.json` rather than re-splitting randomly, so results are comparable to prior work.
-- Optional: add `scripts/verify_datasets.py` at the repo root to automate the checks in this README.
-
----
-
 ## Summary
 
-| Dataset | Images | Primary labels | Ready when |
-|---------|--------|----------------|------------|
-| **HRSID** | 5,604 | COCO JSON in `HRSID_JPG/annotations/` | `HRSID_JPG/JPEGImages/` has 5,604 JPGs |
-| **SSDD** | 1,160 | VOC XML + COCO JSON per variant | `voc_style/JPEGImages/` has 1,160 JPGs per variant |
 
-For questions about HRSID downloads or extended releases, see [HRSID/README.md](HRSID/README.md).
+| Dataset   | Images | Primary labels                        | Ready when                                         |
+| --------- | ------ | ------------------------------------- | -------------------------------------------------- |
+| **HRSID** | 5,604  | COCO JSON in `HRSID_JPG/annotations/` | `HRSID_JPG/JPEGImages/` has 5,604 JPGs             |
+| **SSDD**  | 1,160  | VOC XML + COCO JSON per variant       | `voc_style/JPEGImages/` has 1,160 JPGs per variant |
+
+
