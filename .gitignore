@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Generated training artifacts
+datasets/
+runs/
+checkpoints/
+*.pt
+wandb/
+
+# macOS
+.DS_Store
