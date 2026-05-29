@@ -30,10 +30,19 @@ def main():
     args = ap.parse_args()
 
     # --- Weights & Biases ---
-    use_wandb = not args.no_wandb and bool(os.environ.get("WANDB_API_KEY"))
-    if not args.no_wandb and not use_wandb:
-        print("WARNING: WANDB_API_KEY not set -> W&B logging disabled. "
-              "Run `wandb login` or `export WANDB_API_KEY=...` to enable it.")
+    # Enabled unless --no-wandb. Auth can come from `wandb login` (~/.netrc)
+    # OR the WANDB_API_KEY env var; we accept either.
+    use_wandb = not args.no_wandb
+    if use_wandb:
+        try:
+            import wandb
+            if wandb.api.api_key is None:
+                print("WARNING: not logged into W&B -> logging disabled. "
+                      "Run `wandb login` (or set WANDB_API_KEY) then rerun.")
+                use_wandb = False
+        except ImportError:
+            print("WARNING: wandb not installed -> logging disabled.")
+            use_wandb = False
     os.environ.setdefault("WANDB_PROJECT", args.wandb_project)
 
     from ultralytics import RTDETR, settings
