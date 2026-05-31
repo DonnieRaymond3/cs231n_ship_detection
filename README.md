@@ -260,6 +260,16 @@ python visualization_coco.py
 
 ---
 
+## Models and baselines
+
+| Baseline | Location | Task | Train | Test |
+|----------|----------|------|-------|------|
+| DINOv3 (frozen) + DETR | [dinov3_detr/](dinov3_detr/) | Ship detection (COCO mAP) | HRSID | SSDD (full, cross-domain) |
+
+See [dinov3_detr/README.md](dinov3_detr/README.md) for setup, training, and evaluation. The current default backbone is gated `facebook/dinov3-convnext-large-pretrain-lvd1689m`; the backbone is frozen by default (optical -> SAR domain gap), and compatible DETR weights are initialized from `facebook/detr-resnet-50`. Includes a [Modal](https://modal.com) app for GPU training.
+
+---
+
 ## Citations and licenses
 
 ### HRSID
