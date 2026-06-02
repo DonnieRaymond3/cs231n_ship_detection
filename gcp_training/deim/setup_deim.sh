@@ -39,6 +39,8 @@ pip install -r "$DEIM_DIR/requirements.txt"
 # release where that hook was renamed -> NotImplementedError at train time.
 # Pin the matching torch/torchvision (cu121 wheels run fine on newer drivers).
 pip install "torch==2.1.2" "torchvision==0.16.2" --index-url https://download.pytorch.org/whl/cu121
+# torch 2.1.2 is built against numpy 1.x; numpy 2.x -> "Could not infer dtype".
+pip install "numpy<2"
 pip install wandb gdown
 
 echo "==> Downloading COCO-pretrained DEIM-${MODEL} checkpoint"
