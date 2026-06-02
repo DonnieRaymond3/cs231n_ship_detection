@@ -34,6 +34,11 @@ python3 -m venv "$VENV"
 source "$VENV/bin/activate"
 pip install --upgrade pip
 pip install -r "$DEIM_DIR/requirements.txt"
+# DEIM's transforms use the torchvision v2 `_transform` hook (v0.16.x API).
+# Its requirements.txt is unpinned (torchvision>=0.15.2), so pip grabs a newer
+# release where that hook was renamed -> NotImplementedError at train time.
+# Pin the matching torch/torchvision (cu121 wheels run fine on newer drivers).
+pip install "torch==2.1.2" "torchvision==0.16.2" --index-url https://download.pytorch.org/whl/cu121
 pip install wandb gdown
 
 echo "==> Downloading COCO-pretrained DEIM-${MODEL} checkpoint"
