@@ -27,6 +27,9 @@ def main():
     args = ap.parse_args()
 
     os.chdir(args.deim_root)  # train.py uses cwd-relative config + output paths
+    # runpy.run_path (unlike `python train.py`) doesn't put the script dir on
+    # sys.path, so DEIM's `from engine...` imports fail without this.
+    sys.path.insert(0, args.deim_root)
 
     use_wandb = not args.no_wandb
     if use_wandb:
