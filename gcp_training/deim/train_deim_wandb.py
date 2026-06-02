@@ -26,6 +26,11 @@ def main():
     ap.add_argument("--no-wandb", action="store_true")
     args = ap.parse_args()
 
+    # Avoid "received 0 items of ancdata" — DataLoader workers passing tensors
+    # via file descriptors hit the open-fd limit; file_system strategy avoids it.
+    import torch.multiprocessing as mp
+    mp.set_sharing_strategy("file_system")
+
     os.chdir(args.deim_root)  # train.py uses cwd-relative config + output paths
     # runpy.run_path (unlike `python train.py`) doesn't put the script dir on
     # sys.path, so DEIM's `from engine...` imports fail without this.
