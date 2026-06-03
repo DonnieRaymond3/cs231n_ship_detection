@@ -31,6 +31,8 @@ def main():
     ap.add_argument("--run", default=None)
     ap.add_argument("--no-wandb", action="store_true")
     ap.add_argument("--no-early-stopping", action="store_true")
+    ap.add_argument("--progress-bar", default="rich", choices=["rich", "tqdm", "none"],
+                    help="Live progress bar + ETA (default rich).")
     args = ap.parse_args()
 
     run_name = args.run or f"rfdetr_{args.model}_hrsid_{args.epochs}ep"
@@ -60,6 +62,7 @@ def main():
         wandb=use_wandb,
         project=args.wandb_project,
         run=run_name,
+        progress_bar=None if args.progress_bar == "none" else args.progress_bar,
     )
     if args.resolution is not None:
         if args.resolution % 64 != 0:
