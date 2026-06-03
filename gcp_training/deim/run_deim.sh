@@ -6,6 +6,9 @@
 #   NO_WANDB=1 bash run_deim.sh        # disable W&B
 set -euo pipefail
 
+# Raise FD limit to avoid DataLoader "received 0 items of ancdata".
+ulimit -n 65535 2>/dev/null || true
+
 MODEL="${MODEL:-s}"
 EPOCHS="${EPOCHS:-50}"
 BATCH="${BATCH:-32}"

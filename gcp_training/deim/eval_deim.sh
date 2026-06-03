@@ -8,6 +8,11 @@
 #   CKPT=/path/to/best_stg2.pth bash eval_deim.sh   # eval a specific checkpoint
 set -euo pipefail
 
+# DataLoader workers pass tensors via file descriptors; raise the limit to avoid
+# "received 0 items of ancdata" (eval calls train.py directly, bypassing the
+# train wrapper's file_system sharing strategy).
+ulimit -n 65535 2>/dev/null || true
+
 MODEL="${MODEL:-s}"
 IMGSZ="${IMGSZ:-640}"
 BATCH="${BATCH:-32}"
