@@ -17,8 +17,9 @@ python3 -m venv "$VENV"
 # shellcheck disable=SC1091
 source "$VENV/bin/activate"
 pip install --upgrade pip
-# rfdetr pulls a compatible torch itself.
-pip install rfdetr wandb
+# [train,loggers] pulls pytorch_lightning + wandb/tensorboard loggers (the bare
+# `rfdetr` install is inference-only and fails at train time without these).
+pip install "rfdetr[train,loggers]" wandb
 
 echo "==> Building HRSID dataset for RF-DETR"
 python "$REPO_DIR/gcp_training/rfdetr/prep_rfdetr_data.py"
