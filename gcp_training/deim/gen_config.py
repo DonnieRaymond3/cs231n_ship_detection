@@ -59,8 +59,9 @@ def main():
                     help="Input resolution (DEIM default 640; 800 = HRSID native).")
     args = ap.parse_args()
 
-    if args.imgsz != 640:
-        patch_input_size(args.deim_root, args.imgsz)
+    # Always patch (even to 640): the base configs are mutated in place by prior
+    # runs, so we must set the size deterministically rather than assume default.
+    patch_input_size(args.deim_root, args.imgsz)
 
     flat, no_aug, stop = schedule(args.epochs)
 
