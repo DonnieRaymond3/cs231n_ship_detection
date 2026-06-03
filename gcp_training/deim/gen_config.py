@@ -12,7 +12,30 @@ category=False) uses the raw category_id as the label index -> we set
 num_classes=2 (index 0 unused, index 1 = ship). This is the standard fix.
 """
 import argparse
+import re
 from pathlib import Path
+
+
+def patch_input_size(deim_root: str, size: int):
+    """Set the model's input resolution by editing DEIM's base configs in place.
+
+    Per DEIM's "Customizing Input Size": the train/val Resize ops and collate
+    base_size live in base/dataloader.yml; eval_spatial_size (which drives the
+    transformer's anchor/positional grid) lives in base/dfine_hgnetv2.yml.
+    Regex-based so it's idempotent and re-runnable for any size.
+    """
+    root = Path(deim_root)
+    dl = root / "configs" / "base" / "dataloader.yml"
+    txt = dl.read_text()
+    txt = re.sub(r"(?m)(\bsize: )\[\d+, \d+\]", rf"\g<1>[{size}, {size}]", txt)
+    txt = re.sub(r"(?m)(\bbase_size: )\d+", rf"\g<1>{size}", txt)
+    dl.write_text(txt)
+
+    mc = root / "configs" / "base" / "dfine_hgnetv2.yml"
+    t2 = mc.read_text()
+    t2 = re.sub(r"(?m)(\beval_spatial_size: )\[\d+, \d+\]", rf"\g<1>[{size}, {size}]", t2)
+    mc.write_text(t2)
+    print(f"Patched input size -> {size}x{size} (dataloader.yml + dfine_hgnetv2.yml)")
 
 
 def schedule(epochs: int):
@@ -32,7 +55,12 @@ def main():
     ap.add_argument("--val-json", required=True, help="annotations/test2017.json")
     ap.add_argument("--epochs", type=int, default=50)
     ap.add_argument("--batch", type=int, default=32, help="train total_batch_size")
+    ap.add_argument("--imgsz", type=int, default=640,
+                    help="Input resolution (DEIM default 640; 800 = HRSID native).")
     args = ap.parse_args()
+
+    if args.imgsz != 640:
+        patch_input_size(args.deim_root, args.imgsz)
 
     flat, no_aug, stop = schedule(args.epochs)
 
@@ -41,7 +69,7 @@ __include__: [
   './deim_hgnetv2_{args.size}_coco.yml',
 ]
 
-output_dir: ./outputs/deim_hrsid_{args.size}
+output_dir: ./outputs/deim_hrsid_{args.size}_{args.imgsz}
 
 # HRSID has one category with id=1; remap off uses raw id as label index,
 # so num_classes must be 2 (index 0 unused).

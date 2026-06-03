@@ -9,6 +9,7 @@ set -euo pipefail
 MODEL="${MODEL:-s}"
 EPOCHS="${EPOCHS:-50}"
 BATCH="${BATCH:-32}"
+IMGSZ="${IMGSZ:-640}"
 REPO="${REPO:-$HOME/cs231n_ship_detection}"
 DEIM_DIR="${DEIM_DIR:-$HOME/DEIM}"
 VENV="${VENV:-$HOME/.venv-deim}"
@@ -32,10 +33,10 @@ echo "==> Generating config"
 python "$HERE/gen_config.py" \
   --deim-root "$DEIM_DIR" --size "$MODEL" \
   --img-dir "$IMG" --train-json "$TRAIN_JSON" --val-json "$VAL_JSON" \
-  --epochs "$EPOCHS" --batch "$BATCH"
+  --epochs "$EPOCHS" --batch "$BATCH" --imgsz "$IMGSZ"
 
 REL_CONFIG="configs/deim_dfine/deim_hrsid_${MODEL}.yml"
-OUT="outputs/deim_hrsid_${MODEL}"
+OUT="outputs/deim_hrsid_${MODEL}_${IMGSZ}"
 
 echo "==> Training DEIM-${MODEL} for ${EPOCHS} epochs"
 python "$HERE/train_deim_wandb.py" \
@@ -45,7 +46,7 @@ python "$HERE/train_deim_wandb.py" \
   --summary-dir "$OUT/summary" \
   --output-dir "$OUT" \
   --wandb-project "$WANDB_PROJECT" \
-  --name "deim_hrsid_${MODEL}_${EPOCHS}ep" \
+  --name "deim_hrsid_${MODEL}_${IMGSZ}_${EPOCHS}ep" \
   ${NO_WANDB:+--no-wandb}
 
 echo
