@@ -21,5 +21,9 @@ wandb/
 HRSID/
 SSDD/
 
+# Kept local-only
+/RESULTS.md
+/gcp_training/README.md
+
 # macOS
 .DS_Store
