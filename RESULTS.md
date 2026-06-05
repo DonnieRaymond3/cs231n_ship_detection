@@ -51,6 +51,39 @@ undertrained — not evidence that resolution hurts. Takeaway: at a fixed comput
 budget, effective batch size / training stability mattered more than input
 resolution. We report this as a limitation rather than a clean ablation.
 
+## Size-stratified results (HRSID test, in-domain)
+
+COCO AP by object area, re-evaluated with pycocotools (maxDets=100):
+
+| Model | AP_small | AP_medium | AP_large |
+|-------|----------|-----------|----------|
+| RT-DETR-L | 0.556 | 0.523 | 0.205 |
+| RF-DETR-L | 0.711 | 0.763 | 0.667 |
+| **DEIM-S** | **0.725** | 0.757 | 0.616 |
+
+DEIM and RF-DETR are strong across all sizes; RT-DETR collapses on large ships
+(AP_large 0.205) — consistent with it being undertrained. (Fig: AP-by-size.)
+
+## Cross-dataset generalization (zero-shot: train HRSID, test SSDD)
+
+Models trained only on HRSID, evaluated on the SSDD test set (232 images,
+different sensor/resolution) with no fine-tuning:
+
+| Model | HRSID mAP@50-95 | SSDD mAP@50-95 | HRSID mAP@50 | SSDD mAP@50 | retained (50-95) |
+|-------|-----------------|----------------|-------------|-------------|------------------|
+| RT-DETR-L | 0.539 | 0.406 | 0.814 | 0.742 | 75% |
+| **RF-DETR-L** | 0.707 | **0.540** | 0.934 | **0.861** | **76%** |
+| DEIM-S | 0.718 | 0.496 | 0.936 | 0.809 | 69% |
+
+**Finding 6 — RF-DETR generalizes best across sensors.** Although DEIM is the
+strongest in-domain model, **RF-DETR-L transfers best to SSDD** (0.540 vs DEIM's
+0.496 mAP@50-95; 0.861 vs 0.809 mAP@50) and DEIM degrades the most (only 69%
+retained vs RF-DETR's 76%). This supports the hypothesis that RF-DETR's
+self-supervised DINOv2 backbone yields more transferable features for
+out-of-distribution SAR imagery. The practical takeaway: pick DEIM when the test
+distribution matches training, RF-DETR when robustness to new sensors matters.
+(Figs: generalization mAP@50-95 and mAP@50.)
+
 ## Methodological finding: train/test leakage in HRSID's official split
 
 HRSID's tiles are overlapping 800x800 crops of ~200 large SAR scenes, and the
@@ -66,5 +99,7 @@ generalization numbers.
 ## Figures
 - `paper_figures/fig_comparison_all.png` — models vs. reported baselines
 - `paper_figures/fig_convergence_overlay.png` — mAP@50-95 vs. epoch, all runs
-- `paper_figures/fig_deim_ap_by_size.png` — DEIM AP by object size
+- `paper_figures/fig_ap_by_size.png` — AP by object size, all models
+- `paper_figures/fig_generalization_map5095.png` — HRSID vs. SSDD (mAP@50-95)
+- `paper_figures/fig_generalization_map50.png` — HRSID vs. SSDD (mAP@50)
 - `leakage_figure.png` — train/test tile overlap + 92.8% statistic
