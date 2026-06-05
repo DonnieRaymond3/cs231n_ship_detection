@@ -102,4 +102,6 @@ generalization numbers.
 - `paper_figures/fig_ap_by_size.png` — AP by object size, all models
 - `paper_figures/fig_generalization_map5095.png` — HRSID vs. SSDD (mAP@50-95)
 - `paper_figures/fig_generalization_map50.png` — HRSID vs. SSDD (mAP@50)
+- `paper_figures/qual_rfdetr.png` — RF-DETR predictions vs. ground truth
+- `paper_figures/qual_rtdetr.png` — RT-DETR predictions vs. ground truth
 - `leakage_figure.png` — train/test tile overlap + 92.8% statistic
