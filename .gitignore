@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Generated training artifacts
+datasets/
+runs/
+checkpoints/
+*.pt
+*.pth
+wandb/
+
+# Large dataset dirs — already present on remote; don't commit locally
+HRSID/
+SSDD/
+
+# macOS
+.DS_Store
