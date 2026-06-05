@@ -2,12 +2,19 @@
 __pycache__/
 *.pyc
 
+# Secrets — never commit
+.env
+*.env
+
 # Generated training artifacts
 datasets/
 runs/
+runs_rfdetr/
 checkpoints/
+checkpoints_*/
 *.pt
 *.pth
+*.ckpt
 wandb/
 
 # Large dataset dirs — already present on remote; don't commit locally
