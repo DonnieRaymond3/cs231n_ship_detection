@@ -23,7 +23,7 @@ def load_gt(gt_path):
     return coco["images"]  # each has id, file_name, width, height
 
 
-def predict_rtdetr(ckpt, images, img_dir, conf):
+def predict_rtdetr(ckpt, images, img_dir, conf, cat_id):
     from ultralytics import RTDETR
     m = RTDETR(ckpt)
     dets = []
@@ -32,12 +32,12 @@ def predict_rtdetr(ckpt, images, img_dir, conf):
                       verbose=False, imgsz=800)[0]
         for b in r.boxes:
             x1, y1, x2, y2 = b.xyxy[0].tolist()
-            dets.append({"image_id": im["id"], "category_id": 1,
+            dets.append({"image_id": im["id"], "category_id": cat_id,
                          "bbox": [x1, y1, x2 - x1, y2 - y1], "score": float(b.conf[0])})
     return dets
 
 
-def predict_rfdetr(ckpt, images, img_dir, conf, model_cls, resolution):
+def predict_rfdetr(ckpt, images, img_dir, conf, model_cls, resolution, cat_id):
     import rfdetr
     from PIL import Image
     M = getattr(rfdetr, model_cls)(pretrain_weights=ckpt, resolution=resolution)
@@ -45,10 +45,8 @@ def predict_rfdetr(ckpt, images, img_dir, conf, model_cls, resolution):
     for im in images:
         img = Image.open(os.path.join(img_dir, im["file_name"])).convert("RGB")
         d = M.predict(img, threshold=conf)
-        xyxy = d.xyxy
-        conf_arr = d.confidence
-        for (x1, y1, x2, y2), s in zip(xyxy, conf_arr):
-            dets.append({"image_id": im["id"], "category_id": 1,
+        for (x1, y1, x2, y2), s in zip(d.xyxy, d.confidence):
+            dets.append({"image_id": im["id"], "category_id": cat_id,
                          "bbox": [float(x1), float(y1), float(x2 - x1), float(y2 - y1)],
                          "score": float(s)})
     return dets
@@ -64,16 +62,18 @@ def main():
     ap.add_argument("--conf", type=float, default=0.01, help="low threshold for proper AP")
     ap.add_argument("--model-cls", default="RFDETRLarge", help="rfdetr only")
     ap.add_argument("--resolution", type=int, default=768, help="rfdetr only")
+    ap.add_argument("--cat-id", type=int, default=1,
+                    help="category_id to assign predictions (HRSID=1, SSDD=0)")
     ap.add_argument("--out", default=None, help="optional: save predictions json")
     args = ap.parse_args()
 
     images = load_gt(args.gt)
-    print(f"Running {args.framework} on {len(images)} test images...")
+    print(f"Running {args.framework} on {len(images)} test images (cat_id={args.cat_id})...")
     if args.framework == "rtdetr":
-        dets = predict_rtdetr(args.ckpt, images, args.img_dir, args.conf)
+        dets = predict_rtdetr(args.ckpt, images, args.img_dir, args.conf, args.cat_id)
     else:
         dets = predict_rfdetr(args.ckpt, images, args.img_dir, args.conf,
-                              args.model_cls, args.resolution)
+                              args.model_cls, args.resolution, args.cat_id)
     print(f"  {len(dets)} detections")
 
     if args.out:

@@ -22,9 +22,12 @@ VENV="${VENV:-$HOME/.venv-deim}"
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 HRSID="$REPO/HRSID/HRSID_JPG"
-IMG="$HRSID/JPEGImages"
-TRAIN_JSON="$HRSID/annotations/train2017.json"
-VAL_JSON="$HRSID/annotations/test2017.json"
+# Override IMG / VAL_JSON to evaluate on another dataset (e.g. SSDD cross-eval).
+# For SSDD, remap its category_id 0 -> 1 first (see remap_cat.py) so it matches
+# DEIM's learned ship class.
+IMG="${IMG:-$HRSID/JPEGImages}"
+TRAIN_JSON="${TRAIN_JSON:-$HRSID/annotations/train2017.json}"
+VAL_JSON="${VAL_JSON:-$HRSID/annotations/test2017.json}"
 OUT="$DEIM_DIR/outputs/deim_hrsid_${MODEL}_${IMGSZ}"
 
 # shellcheck disable=SC1091
