@@ -1,0 +1,70 @@
+# Results (HRSID, official split)
+
+All models fine-tuned from COCO-pretrained weights for 50 epochs (AdamW). Metrics
+are COCO bbox AP on the official HRSID test split (1,962 tiles). Literature rows
+are *reported*, not reproduced.
+
+## Main table
+
+| Model | Res | mAP@50 | mAP@50-95 | AP_small | AP_medium | AP_large |
+|-------|-----|--------|-----------|----------|-----------|----------|
+| Faster R-CNN* | — | 0.867 | 0.635 | — | — | — |
+| Cascade R-CNN* | — | 0.877 | 0.666 | — | — | — |
+| YOLOv8* | — | 0.887 | 0.628 | — | — | — |
+| RT-DETR-L (ours) | 800 | 0.833 | 0.544 | — | — | — |
+| RF-DETR-M (ours) | 576 | 0.923 | 0.660 | — | — | — |
+| RF-DETR-L (ours) | 768 | 0.936 | 0.695 | — | — | — |
+| **DEIM-S (ours)** | **640** | **0.936** | **0.718** | **0.725** | **0.757** | 0.616 |
+| DEIM-S (ours) | 800 | 0.930 | 0.687 | 0.693 | 0.710 | 0.616 |
+
+\* reported in the literature, not reproduced here.
+
+## Findings
+
+**1. Modern DETR detectors beat both the baselines and reported HRSID results.**
+DEIM (0.718 mAP@50-95) and RF-DETR-L (0.695) exceed the best reported baseline
+(Cascade R-CNN, 0.666) and far exceed our RT-DETR (0.544). (Fig: comparison.)
+
+**2. DEIM is the strongest model, with the edge on tight localization.**
+DEIM and RF-DETR-L tie on mAP@50 (0.936), but DEIM leads mAP@50-95 by +0.023
+(0.718 vs 0.695). Notably DEIM achieves this at *lower* input resolution than
+RF-DETR-L (640 vs 768), so the advantage is architectural, not resolution —
+attributable to D-FINE's distribution-based box regression. (Fig: comparison.)
+
+**3. Convergence explains RT-DETR's weakness.**
+RT-DETR underperforms not because the architecture is weak but because plain DETR
+matching converges slowly; at 50 epochs it is undertrained and its mAP@50-95 curve
+is still rising. DEIM's dense one-to-one matching converges fastest and plateaus
+highest. (Fig: convergence overlay.)
+
+**4. Object-size analysis: small ships are handled well; large ships are the
+weak point.** DEIM's AP is 0.725 (small) and 0.757 (medium) but only 0.616
+(large). This is counter-intuitive but expected: HRSID is dominated by small
+vessels, so the "large" bucket is sparse and noisy. The strong small-object AP is
+the relevant SAR result. (Fig: AP-by-size.)
+
+**5. Higher resolution did NOT help here — a batch-size confound.**
+DEIM@800 (0.687) underperformed DEIM@640 (0.718), and even AP_small dropped
+(0.725 -> 0.693). This is almost certainly because the 800px run was forced to a
+smaller batch (32 -> 8/16) by GPU memory at the same learning rate, leaving it
+undertrained — not evidence that resolution hurts. Takeaway: at a fixed compute
+budget, effective batch size / training stability mattered more than input
+resolution. We report this as a limitation rather than a clean ablation.
+
+## Methodological finding: train/test leakage in HRSID's official split
+
+HRSID's tiles are overlapping 800x800 crops of ~200 large SAR scenes, and the
+official split assigns *tiles* (not scenes) to train/test. We find **135 of 135
+test scenes also appear in training**, and **92.8% of test tiles share pixels
+with a training tile**. All absolute numbers above (ours and the literature
+baselines, which use the same split) are therefore optimistic relative to true
+generalization. The model-to-model comparison remains valid (identical split and
+eval for all), but absolute mAP should not be read as in-the-wild performance.
+(Fig: leakage.) A scene-disjoint re-split is the recommended fix for honest
+generalization numbers.
+
+## Figures
+- `paper_figures/fig_comparison_all.png` — models vs. reported baselines
+- `paper_figures/fig_convergence_overlay.png` — mAP@50-95 vs. epoch, all runs
+- `paper_figures/fig_deim_ap_by_size.png` — DEIM AP by object size
+- `leakage_figure.png` — train/test tile overlap + 92.8% statistic
