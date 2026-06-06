@@ -1,21 +1,3 @@
-"""Run the DINOv3 + DETR HRSID->SSDD baseline on Modal with a GPU.
-
-Workflow:
-    1. Create Hugging Face + W&B secrets:
-         modal secret create huggingface HF_TOKEN=hf_xxx
-         modal secret create wandb WANDB_API_KEY=xxx
-    2. Build the SSDD test file locally (once):
-         python make_ssdd_coco.py
-    3. Upload datasets to a Modal Volume (once):
-         modal run modal_app.py::upload
-    4. Train on HRSID, then evaluate on the full SSDD set:
-         modal run modal_app.py            # train + eval
-         modal run modal_app.py::train_remote --epochs 12 --batch-size 8
-         modal run modal_app.py::evaluate_remote
-
-Checkpoints land in the `dinov3-detr-outputs` volume under /outputs/dinov3_detr.
-"""
-
 import os
 
 import modal
@@ -23,11 +5,10 @@ import modal
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
-GPU = os.environ.get("MODAL_GPU", "A100")  # e.g. A10G, L4, A100, H100
+GPU = os.environ.get("MODAL_GPU", "A100")                             
 DEFAULT_BACKBONE = "facebook/dinov3-convnext-large-pretrain-lvd1689m"
 DEFAULT_PRETRAINED_DETR = "facebook/detr-resnet-50"
 
-# Remote paths inside the container.
 HRSID_IMAGES = "/data/hrsid/JPEGImages"
 HRSID_TRAIN_ANN = "/data/hrsid/annotations/train2017.json"
 HRSID_VAL_ANN = "/data/hrsid/annotations/test2017.json"
@@ -50,7 +31,7 @@ image = (
         "tqdm>=4.65",
         "wandb>=0.16",
     )
-    # Ship the package source so the remote functions can import it.
+
     .add_local_dir(APP_DIR, remote_path="/root/app", ignore=["outputs", "__pycache__", "*.pyc"])
 )
 
@@ -58,11 +39,10 @@ app = modal.App("dinov3-detr-hrsid-ssdd")
 
 data_vol = modal.Volume.from_name("ship-data", create_if_missing=True)
 out_vol = modal.Volume.from_name("dinov3-detr-outputs", create_if_missing=True)
-hf_secret = modal.Secret.from_name("huggingface")  # must contain an approved HF_TOKEN for gated DINOv3
-wandb_secret = modal.Secret.from_name("wandb")  # must contain WANDB_API_KEY
+hf_secret = modal.Secret.from_name("huggingface")                                                      
+wandb_secret = modal.Secret.from_name("wandb")                              
 
 WANDB_PROJECT = "dinov3-detr-ship"
-
 
 @app.function(
     image=image,
@@ -102,7 +82,6 @@ def train_remote(epochs: int = 12, batch_size: int = 8, lr: float = 1e-4,
     )
     out_vol.commit()
 
-
 @app.function(
     image=image,
     gpu=GPU,
@@ -118,8 +97,6 @@ def evaluate_remote(threshold: float = 0.0, limit: int = 0, wandb_run_name: str 
     sys.path.insert(0, "/root/app")
     from evaluate import run_eval
 
-    # SSDD ship category_id is 0. Reuse the training run name so SSDD metrics
-    # attach to the same W&B run.
     return run_eval(
         model_dir=OUTPUT_DIR,
         images=SSDD_IMAGES,
@@ -133,7 +110,6 @@ def evaluate_remote(threshold: float = 0.0, limit: int = 0, wandb_run_name: str 
             backbone=backbone,
             pretrained_detr=pretrained_detr or None,
     )
-
 
 @app.function(
     image=image,
@@ -181,10 +157,8 @@ def visualize_remote(
     out_vol.commit()
     return result
 
-
 @app.local_entrypoint()
 def upload():
-    """Push HRSID + SSDD from the local repo into the `ship-data` volume."""
     hrsid = os.path.join(REPO_ROOT, "HRSID", "HRSID_JPG")
     ssdd_images = os.path.join(REPO_ROOT, "SSDD", "BBox_SSDD", "voc_style", "JPEGImages")
     ssdd_ann = os.path.join(REPO_ROOT, "SSDD", "ssdd_all.json")
@@ -201,16 +175,11 @@ def upload():
         b.put_file(ssdd_ann, "/ssdd/ssdd_all.json")
     print("Upload complete.")
 
-
 @app.local_entrypoint()
 def main(epochs: int = 12, batch_size: int = 8, run_name: str = None,
          compute_epoch_map: bool = True, map_limit: int = 0,
          backbone: str = DEFAULT_BACKBONE,
          pretrained_detr: str = DEFAULT_PRETRAINED_DETR):
-    """Train on HRSID then evaluate on the full SSDD set.
-
-    A shared ``run_name`` keeps training curves and SSDD metrics in one W&B run.
-    """
     import time
 
     run_name = run_name or f"dinov3-detr-{int(time.time())}"

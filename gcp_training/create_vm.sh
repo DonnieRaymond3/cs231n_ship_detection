@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# Create a GPU VM on GCP for RT-DETR training. Run this LOCALLY (needs gcloud).
-#
-# Defaults: 1x NVIDIA L4 on a g2-standard-8 (good speed/cost for this job).
-# Override any value with an env var, e.g.:
-#   ZONE=us-west1-a GPU_TYPE=nvidia-tesla-t4 MACHINE=n1-standard-8 ./create_vm.sh
 set -euo pipefail
 
 VM_NAME="${VM_NAME:-rtdetr-hrsid}"
@@ -12,10 +7,8 @@ MACHINE="${MACHINE:-g2-standard-8}"          # L4 host. For T4 use n1-standard-8
 GPU_TYPE="${GPU_TYPE:-nvidia-l4}"            # or nvidia-tesla-t4
 GPU_COUNT="${GPU_COUNT:-1}"
 BOOT_DISK_GB="${BOOT_DISK_GB:-100}"
-# Deep Learning VM: PyTorch + CUDA + driver preinstalled.
 IMAGE_FAMILY="${IMAGE_FAMILY:-pytorch-2-9-cu129-ubuntu-2204-nvidia-580}"
 IMAGE_PROJECT="${IMAGE_PROJECT:-deeplearning-platform-release}"
-# Set SPOT=1 for ~60-70% cheaper preemptible VM (can be reclaimed mid-run).
 SPOT="${SPOT:-0}"
 
 ACCEL="type=${GPU_TYPE},count=${GPU_COUNT}"

@@ -1,20 +1,3 @@
-#!/usr/bin/env python3
-"""
-Convert HRSID COCO annotations -> YOLO format for Ultralytics RT-DETR training.
-
-The HRSID data ships inside this repo at:
-    HRSID/HRSID_JPG/JPEGImages/                  (5,604 .jpg tiles)
-    HRSID/HRSID_JPG/annotations/train2017.json   (3,642 images)
-    HRSID/HRSID_JPG/annotations/test2017.json    (1,962 images)
-
-This builds an Ultralytics-style dataset tree:
-    <out>/images/train  <out>/labels/train
-    <out>/images/val    <out>/labels/val
-    <out>/hrsid.yaml
-
-By default images are symlinked (fast, no extra disk). Use --copy to copy them
-instead (needed if the training box can't follow symlinks into the repo).
-"""
 import argparse
 import json
 import os
@@ -22,7 +5,6 @@ import shutil
 from pathlib import Path
 
 import yaml
-
 
 def coco_to_yolo(ann_file, images_src_dir, out_images_dir, out_labels_dir, link=True):
     out_images_dir = Path(out_images_dir)
@@ -39,7 +21,6 @@ def coco_to_yolo(ann_file, images_src_dir, out_images_dir, out_labels_dir, link=
     for ann in data["annotations"]:
         ann_by_img.setdefault(ann["image_id"], []).append(ann)
 
-    # Index source images once (recursive) so lookups are O(1).
     src_index = {p.name: p for p in Path(images_src_dir).rglob("*.jpg")}
 
     converted, skipped = 0, 0
@@ -68,7 +49,7 @@ def coco_to_yolo(ann_file, images_src_dir, out_images_dir, out_labels_dir, link=
                 cy = (y_min + bh / 2) / h
                 nw = bw / w
                 nh = bh / h
-                # Clamp to [0, 1]
+
                 cx, cy = min(max(cx, 0.0), 1.0), min(max(cy, 0.0), 1.0)
                 nw, nh = min(max(nw, 0.0), 1.0), min(max(nh, 0.0), 1.0)
                 lf.write(f"0 {cx:.6f} {cy:.6f} {nw:.6f} {nh:.6f}\n")
@@ -76,7 +57,6 @@ def coco_to_yolo(ann_file, images_src_dir, out_images_dir, out_labels_dir, link=
 
     print(f"  converted {converted} images, skipped {skipped} (missing source)")
     return converted
-
 
 def main():
     repo_root = Path(__file__).resolve().parent.parent
@@ -124,7 +104,6 @@ def main():
     print(f"\nDataset ready at {out}")
     print(f"  train images: {n_train}  |  val images: {n_val}")
     print(f"  yaml: {yaml_path}")
-
 
 if __name__ == "__main__":
     main()

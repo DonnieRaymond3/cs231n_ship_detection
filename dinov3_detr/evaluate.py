@@ -1,21 +1,6 @@
-"""Evaluate a trained DINO + DETR model with COCO mAP.
-
-By default this evaluates on the full SSDD dataset (cross-domain test) using
-SSDD's category_id 0. Override --ann / --images / --label-to-cat for HRSID.
-
-Examples:
-    python evaluate.py --model-dir outputs                 # SSDD (default)
-    python evaluate.py --model-dir outputs \\
-        --ann ../HRSID/HRSID_JPG/annotations/test2017.json \\
-        --images ../HRSID/HRSID_JPG/JPEGImages --label-to-cat 1
-
-``run_eval`` is importable so the Modal app can call it on a GPU.
-"""
-
 import argparse
 import json
 import os
-
 
 def pick_device():
     import torch
@@ -26,15 +11,12 @@ def pick_device():
         return "mps"
     return "cpu"
 
-
 COCO_STAT_NAMES = [
     "AP", "AP50", "AP75", "AP_small", "AP_medium", "AP_large",
     "AR_1", "AR_10", "AR_100", "AR_small", "AR_medium", "AR_large",
 ]
 
-
 def load_trained_model(model_dir, backbone, pretrained_detr=None, device=None):
-    """Load a checkpoint saved from our custom DINO+DETR adapter model."""
     import torch
 
     from model import build_model
@@ -61,8 +43,7 @@ def load_trained_model(model_dir, backbone, pretrained_detr=None, device=None):
     target_state = model.state_dict()
     remapped = {}
     prefix_map = {
-        # Some Transformers save_pretrained paths serialize custom backbone
-        # adapters under the original DETR conv-encoder namespace.
+
         "model.backbone.conv_encoder.model.": "model.backbone.backbone.",
         "model.backbone.conv_encoder.backbone.": "model.backbone.backbone.model.",
     }
@@ -92,7 +73,6 @@ def load_trained_model(model_dir, backbone, pretrained_detr=None, device=None):
         )
     return model.to(device).eval()
 
-
 def evaluate_model_on_coco(
     model,
     processor,
@@ -109,7 +89,6 @@ def evaluate_model_on_coco(
     wandb_run_name=None,
     wandb_step=None,
 ):
-    """Run COCO bbox evaluation for an in-memory DETR model."""
     import torch
     from PIL import Image
     from pycocotools.coco import COCO
@@ -187,7 +166,6 @@ def evaluate_model_on_coco(
 
     return stats
 
-
 def run_eval(model_dir, images, ann, threshold=0.0, label_to_cat=0, limit=0,
              wandb_project=None, wandb_run_name=None, metric_prefix="ssdd",
              backbone=None, pretrained_detr=None):
@@ -197,8 +175,7 @@ def run_eval(model_dir, images, ann, threshold=0.0, label_to_cat=0, limit=0,
 
     device = pick_device()
     processor = AutoImageProcessor.from_pretrained(model_dir)
-    # Checkpoints from this project use a custom backbone adapter, so load the
-    # model through build_model() instead of vanilla from_pretrained().
+
     model = load_trained_model(
         model_dir,
         backbone or DEFAULTS["backbone"],
@@ -222,7 +199,6 @@ def run_eval(model_dir, images, ann, threshold=0.0, label_to_cat=0, limit=0,
     )
     return stats
 
-
 def parse_args():
     from config import DEFAULTS
 
@@ -244,7 +220,6 @@ def parse_args():
     p.add_argument("--pretrained-detr", default=DEFAULTS["pretrained_detr"])
     return p.parse_args()
 
-
 def main():
     args = parse_args()
     run_eval(
@@ -260,7 +235,6 @@ def main():
         backbone=args.backbone,
         pretrained_detr=args.pretrained_detr or None,
     )
-
 
 if __name__ == "__main__":
     main()

@@ -1,27 +1,11 @@
-#!/usr/bin/env python3
-"""
-Compute the full COCO AP breakdown (incl. AP small/medium/large) for RT-DETR
-(ultralytics) or RF-DETR on the HRSID test split, via inference + pycocotools.
-
-DEIM already logs the full breakdown in its log.txt; this fills in the other two
-so you get a consistent size-stratified table across all models.
-
-Run ON the VM (GPU), in the matching venv:
-  RT-DETR  (~/.venv):        python eval_size_breakdown.py --framework rtdetr \
-               --ckpt <best.pt>
-  RF-DETR  (~/.venv-rfdetr): python eval_size_breakdown.py --framework rfdetr \
-               --ckpt <checkpoint_best_ema.pth> --model-cls RFDETRLarge --resolution 768
-"""
 import argparse
 import json
 import os
 from pathlib import Path
 
-
 def load_gt(gt_path):
     coco = json.load(open(gt_path))
-    return coco["images"]  # each has id, file_name, width, height
-
+    return coco["images"]                                         
 
 def predict_rtdetr(ckpt, images, img_dir, conf, cat_id):
     from ultralytics import RTDETR
@@ -36,7 +20,6 @@ def predict_rtdetr(ckpt, images, img_dir, conf, cat_id):
                          "bbox": [x1, y1, x2 - x1, y2 - y1], "score": float(b.conf[0])})
     return dets
 
-
 def predict_rfdetr(ckpt, images, img_dir, conf, model_cls, resolution, cat_id):
     import rfdetr
     from PIL import Image
@@ -50,7 +33,6 @@ def predict_rfdetr(ckpt, images, img_dir, conf, model_cls, resolution, cat_id):
                          "bbox": [float(x1), float(y1), float(x2 - x1), float(y2 - y1)],
                          "score": float(s)})
     return dets
-
 
 def main():
     repo = Path(__file__).resolve().parent.parent
@@ -92,7 +74,6 @@ def main():
     print(f"AP_small  = {s[3]:.4f}")
     print(f"AP_medium = {s[4]:.4f}")
     print(f"AP_large  = {s[5]:.4f}")
-
 
 if __name__ == "__main__":
     main()

@@ -1,13 +1,3 @@
-"""Merge the SSDD COCO train + test splits into one full-dataset test file.
-
-We train on HRSID and use the *entire* SSDD dataset (1,160 images) as a
-held-out, cross-domain test set. SSDD's coco_style ships separate train.json
-and test.json with disjoint image ids; all 1,160 images also exist together in
-``voc_style/JPEGImages``, so the merged file points there.
-
-Output: SSDD/ssdd_all.json  (category_id 0 == ship, matching SSDD's convention)
-"""
-
 import argparse
 import json
 import os
@@ -15,7 +5,6 @@ import os
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_SRC = os.path.join(REPO_ROOT, "SSDD", "BBox_SSDD", "coco_style", "annotations")
 DEFAULT_OUT = os.path.join(REPO_ROOT, "SSDD", "ssdd_all.json")
-
 
 def merge(src_dir: str, splits, out_path: str):
     images, annotations = [], []
@@ -36,7 +25,6 @@ def merge(src_dir: str, splits, out_path: str):
             seen_image_ids.add(img["id"])
             images.append(img)
 
-        # Re-index annotation ids so train + test ids never collide.
         for ann in coco["annotations"]:
             ann = dict(ann)
             ann["id"] = next_ann_id
@@ -58,7 +46,6 @@ def merge(src_dir: str, splits, out_path: str):
     print(f"  categories: {categories}")
     return merged
 
-
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--src-dir", default=DEFAULT_SRC)
@@ -66,7 +53,6 @@ def main():
     p.add_argument("--out", default=DEFAULT_OUT)
     args = p.parse_args()
     merge(args.src_dir, args.splits, args.out)
-
 
 if __name__ == "__main__":
     main()

@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
-# Generate the HRSID config and launch DEIM fine-tuning with live W&B logging.
-# Run ON the VM after setup_deim.sh.
-#
-#   MODEL=s EPOCHS=50 BATCH=32 bash run_deim.sh
-#   NO_WANDB=1 bash run_deim.sh        # disable W&B
 set -euo pipefail
 
-# Raise FD limit to avoid DataLoader "received 0 items of ancdata".
 ulimit -n 65535 2>/dev/null || true
 
 MODEL="${MODEL:-s}"
@@ -29,7 +23,6 @@ for p in "$IMG" "$TRAIN_JSON" "$VAL_JSON" "$CKPT"; do
   [ -e "$p" ] || { echo "ERROR: missing $p (run setup_deim.sh first)"; exit 1; }
 done
 
-# shellcheck disable=SC1091
 source "$VENV/bin/activate"
 
 echo "==> Generating config"

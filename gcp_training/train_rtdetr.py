@@ -1,16 +1,6 @@
-#!/usr/bin/env python3
-"""
-Train RT-DETR-L on HRSID (YOLO-format) with Weights & Biases logging.
-
-Mirrors the hyperparameters from nishank/SAR_Ship_Detection_RTDETR.ipynb:
-AdamW, lr0=1e-4, SAR-friendly augmentations, mosaic/copy_paste/mixup disabled.
-
-Run prepare_hrsid.py first to build the dataset + yaml.
-"""
 import argparse
 import os
 from pathlib import Path
-
 
 def main():
     repo_root = Path(__file__).resolve().parent.parent
@@ -29,9 +19,6 @@ def main():
     ap.add_argument("--resume", action="store_true", help="Resume from last.pt of this run.")
     args = ap.parse_args()
 
-    # --- Weights & Biases ---
-    # Enabled unless --no-wandb. Auth can come from `wandb login` (~/.netrc)
-    # OR the WANDB_API_KEY env var; we accept either.
     use_wandb = not args.no_wandb
     if use_wandb:
         try:
@@ -65,7 +52,6 @@ def main():
         warmup_epochs=3,
         weight_decay=1e-4,
 
-        # SAR augmentations: no color/hue jitter, geometric only.
         hsv_h=0.0,
         hsv_s=0.0,
         hsv_v=0.3,
@@ -73,7 +59,6 @@ def main():
         flipud=0.3,
         degrees=15.0,
 
-        # Disabled for RT-DETR (notebook note: required for stable training).
         mosaic=0.0,
         copy_paste=0.0,
         mixup=0.0,
@@ -94,7 +79,6 @@ def main():
     print(f"  best weights: {run_dir / 'weights' / 'best.pt'}")
     print(f"  last weights: {run_dir / 'weights' / 'last.pt'}")
     print(f"  results csv:  {run_dir / 'results.csv'}")
-
 
 if __name__ == "__main__":
     main()

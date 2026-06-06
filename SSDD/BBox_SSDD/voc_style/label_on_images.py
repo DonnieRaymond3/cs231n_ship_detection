@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 from __future__ import division 
 import os
 import xml.dom.minidom
 import cv2
-  
+
 def read_xml(ImgPath = 'JPEGImages_test/', AnnoPath = 'Annotations_test/', Savepath = 'JPEGImages_test_BBox_GT/'):
 
     if not os.path.isdir(Savepath):
@@ -36,10 +35,8 @@ def read_xml(ImgPath = 'JPEGImages_test/', AnnoPath = 'Annotations_test/', Savep
                     ymax = int(ymax_list[0].childNodes[0].data)
 
                     cv2.rectangle(im,(xmin,ymin),(xmax,ymax), (0, 255, 0), 2)
-                    # cv2.putText(im, 'ship', (xmin,ymin - 7), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 4)
+
         path = Savepath + '/' + image_pre + '.jpg'
-                    # font = cv2.FONT_HERSHEY_SIMPLEX
-                    # cv2.putText(im, objectname, (xmin,ymin - 7), font, 0.5, (0, 0, 255), 1)
-                    
+
         cv2.imwrite(path, im)
 read_xml()

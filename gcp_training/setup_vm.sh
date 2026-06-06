@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Run this ON the GCP VM after SSHing in. Installs Python deps into a venv.
-# Assumes an NVIDIA Deep Learning VM image (CUDA + driver + PyTorch preinstalled).
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$HOME/cs231n_ship_detection}"
@@ -16,7 +14,6 @@ sudo apt-get install -y python3-venv libgl1 libglib2.0-0
 
 echo "==> Creating virtualenv (.venv)"
 python3 -m venv "$HOME/.venv"
-# shellcheck disable=SC1091
 source "$HOME/.venv/bin/activate"
 pip install --upgrade pip
 

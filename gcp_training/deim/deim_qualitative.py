@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-"""
-Qualitative GT-vs-prediction panel for DEIM (ground truth green, predictions red).
-Loads the model the same way DEIM's tools/inference/torch_inf.py does, draws with
-PIL (no matplotlib needed in ~/.venv-deim), and uses the same --seed as
-qualitative_samples.py so the sampled images match across models.
-
-Run config must match the checkpoint's training resolution (640 for best_stg2).
-Regenerate it first with gen_config.py --imgsz 640 (see the README/eval flow).
-"""
 import argparse
 import json
 import os
@@ -19,7 +9,6 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as T
 from PIL import Image, ImageDraw
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -64,7 +53,7 @@ def main():
     id2img = {im["id"]: im for im in coco["images"]}
     gt = defaultdict(list)
     for a in coco["annotations"]:
-        gt[a["image_id"]].append(a["bbox"])  # [x,y,w,h]
+        gt[a["image_id"]].append(a["bbox"])             
 
     random.seed(args.seed)
     ids = random.sample(list(id2img), args.n)
@@ -107,7 +96,6 @@ def main():
     out = os.path.expanduser(args.out)
     panel.save(out)
     print(f"saved {out}")
-
 
 if __name__ == "__main__":
     main()

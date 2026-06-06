@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-# Run this ON the GCP VM after SSHing in. Clones DEIM, makes a venv, installs
-# deps + wandb, and downloads the COCO-pretrained checkpoint for fine-tuning.
-#
-#   MODEL=s bash setup_deim.sh      # n | s | m | l | x  (default s)
 set -euo pipefail
 
 MODEL="${MODEL:-s}"
 DEIM_DIR="${DEIM_DIR:-$HOME/DEIM}"
 VENV="${VENV:-$HOME/.venv-deim}"
 
-# Google Drive file IDs for DEIM (D-FINE backbone) COCO-pretrained checkpoints.
 declare -A CKPT_ID=(
   [n]=1ZPEhiU9nhW4M5jLnYOFwTSLQC1Ugf62e
   [s]=1tB8gVJNrfb6dhFvoHJECKOF5VpkthhfC
@@ -30,16 +25,10 @@ echo "==> Cloning DEIM -> $DEIM_DIR"
 
 echo "==> venv -> $VENV"
 python3 -m venv "$VENV"
-# shellcheck disable=SC1091
 source "$VENV/bin/activate"
 pip install --upgrade pip
 pip install -r "$DEIM_DIR/requirements.txt"
-# DEIM's transforms use the torchvision v2 `_transform` hook (v0.16.x API).
-# Its requirements.txt is unpinned (torchvision>=0.15.2), so pip grabs a newer
-# release where that hook was renamed -> NotImplementedError at train time.
-# Pin the matching torch/torchvision (cu121 wheels run fine on newer drivers).
 pip install "torch==2.1.2" "torchvision==0.16.2" --index-url https://download.pytorch.org/whl/cu121
-# torch 2.1.2 is built against numpy 1.x; numpy 2.x -> "Could not infer dtype".
 pip install "numpy<2"
 pip install wandb gdown
 

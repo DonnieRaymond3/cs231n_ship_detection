@@ -1,20 +1,9 @@
-"""HRSID (COCO format) dataset and collate function for the DETR image processor.
-
-Each dataset item is a dict::
-
-    {"image": PIL.Image (RGB), "objects": {...}, "image_id": int}
-
-The COCO ``category_id`` (ship == 1 in HRSID) is remapped to a 0-indexed
-label, which is what ``DetrForObjectDetection`` expects.
-"""
-
 import json
 import os
 from typing import Dict, Optional
 
 from PIL import Image
 from torch.utils.data import Dataset
-
 
 class HRSIDDetectionDataset(Dataset):
     def __init__(
@@ -68,9 +57,7 @@ class HRSIDDetectionDataset(Dataset):
         }
         return {"image": image, "objects": objects, "image_id": int(image_id)}
 
-
 def format_annotations(objects: Dict, image_id: int) -> Dict:
-    """Convert one item's objects into the COCO dict the processor consumes."""
     anns = []
     for i in range(len(objects["bbox"])):
         x, y, w, h = objects["bbox"][i]
@@ -86,9 +73,7 @@ def format_annotations(objects: Dict, image_id: int) -> Dict:
         )
     return {"image_id": int(image_id), "annotations": anns}
 
-
 def make_collate_fn(image_processor):
-    """Build a collate_fn bound to a DETR image processor."""
 
     def collate_fn(examples):
         images = [ex["image"] for ex in examples]

@@ -1,29 +1,8 @@
-#!/usr/bin/env python3
-"""
-Generate a DEIM custom-dataset config for HRSID and write it into the cloned
-DEIM repo at configs/deim_dfine/deim_hrsid_<size>.yml.
-
-It includes the chosen size's COCO config and overrides only what HRSID needs:
-dataset paths, num_classes, batch size, and a fine-tuning epoch/aug schedule
-rescaled from DEIM's default 132-epoch recipe.
-
-HRSID note: its single category has category_id=1, and DEIM (remap_mscoco_
-category=False) uses the raw category_id as the label index -> we set
-num_classes=2 (index 0 unused, index 1 = ship). This is the standard fix.
-"""
 import argparse
 import re
 from pathlib import Path
 
-
 def patch_input_size(deim_root: str, size: int):
-    """Set the model's input resolution by editing DEIM's base configs in place.
-
-    Per DEIM's "Customizing Input Size": the train/val Resize ops and collate
-    base_size live in base/dataloader.yml; eval_spatial_size (which drives the
-    transformer's anchor/positional grid) lives in base/dfine_hgnetv2.yml.
-    Regex-based so it's idempotent and re-runnable for any size.
-    """
     root = Path(deim_root)
     dl = root / "configs" / "base" / "dataloader.yml"
     txt = dl.read_text()
@@ -37,14 +16,11 @@ def patch_input_size(deim_root: str, size: int):
     mc.write_text(t2)
     print(f"Patched input size -> {size}x{size} (dataloader.yml + dfine_hgnetv2.yml)")
 
-
 def schedule(epochs: int):
-    """Rescale DEIM's (epoches=132, no_aug=12) recipe to `epochs`."""
     no_aug = max(2, round(epochs * 12 / 132))
     stop = epochs - no_aug
     flat = 4 + (epochs - no_aug) // 2
     return flat, no_aug, stop
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -59,8 +35,6 @@ def main():
                     help="Input resolution (DEIM default 640; 800 = HRSID native).")
     args = ap.parse_args()
 
-    # Always patch (even to 640): the base configs are mutated in place by prior
-    # runs, so we must set the size deterministically rather than assume default.
     patch_input_size(args.deim_root, args.imgsz)
 
     flat, no_aug, stop = schedule(args.epochs)
@@ -105,8 +79,7 @@ val_dataloader:
     print(f"Wrote {out}")
     print(f"  size={args.size}  epochs={args.epochs}  batch={args.batch}")
     print(f"  schedule: flat_epoch={flat}  no_aug_epoch={no_aug}  stop_epoch={stop}")
-    print(str(out))  # last line = path, for shell capture
-
+    print(str(out))                                       
 
 if __name__ == "__main__":
     main()

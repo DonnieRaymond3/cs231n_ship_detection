@@ -1,17 +1,7 @@
-#!/usr/bin/env python3
-"""
-Launch DEIM's train.py in-process with live Weights & Biases logging.
-
-DEIM logs to TensorBoard natively. By calling wandb.init(sync_tensorboard=True)
-in this same process *before* DEIM creates its SummaryWriter, every scalar DEIM
-writes is mirrored to W&B live. Runs single-process (no torchrun) so the patch
-applies to the one process that does the training.
-"""
 import argparse
 import os
 import runpy
 import sys
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -26,14 +16,11 @@ def main():
     ap.add_argument("--no-wandb", action="store_true")
     args = ap.parse_args()
 
-    # Avoid "received 0 items of ancdata" — DataLoader workers passing tensors
-    # via file descriptors hit the open-fd limit; file_system strategy avoids it.
     import torch.multiprocessing as mp
     mp.set_sharing_strategy("file_system")
 
-    os.chdir(args.deim_root)  # train.py uses cwd-relative config + output paths
-    # runpy.run_path (unlike `python train.py`) doesn't put the script dir on
-    # sys.path, so DEIM's `from engine...` imports fail without this.
+    os.chdir(args.deim_root)                                                    
+
     sys.path.insert(0, args.deim_root)
 
     use_wandb = not args.no_wandb
@@ -67,7 +54,6 @@ def main():
         if use_wandb:
             import wandb
             wandb.finish()
-
 
 if __name__ == "__main__":
     main()

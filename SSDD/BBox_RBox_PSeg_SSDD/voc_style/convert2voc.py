@@ -5,7 +5,7 @@ with open(path, 'r') as csv_file:
     contents = csv_file.read()
     print('contents = ', contents)
     image_list = contents.split('\n\n')[:-1]
-    # print('len(image_list) = ', len(image_list))
+
     for one_image in image_list:
         lines = one_image.split('\n')
 
@@ -51,8 +51,6 @@ with open(path, 'r') as csv_file:
                 y3 = one_object.split(',')[34]
                 x4 = one_object.split(',')[36]
                 y4 = one_object.split(',')[38]
-
-
 
                 xml_file.write('\t\t<name>{}</name>\n'.format('ship'))
                 xml_file.write('\t\t<pose>{}</pose>\n'.format('Unspecified'))

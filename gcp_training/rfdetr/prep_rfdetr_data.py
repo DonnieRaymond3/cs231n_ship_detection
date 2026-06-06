@@ -1,24 +1,8 @@
-#!/usr/bin/env python3
-"""
-Build the Roboflow/COCO dataset layout RF-DETR expects from HRSID's native COCO.
-
-RF-DETR wants:
-    <out>/train/_annotations.coco.json  + the train images
-    <out>/valid/_annotations.coco.json  + the val images
-    <out>/test/_annotations.coco.json   + the test images   (optional)
-
-HRSID stores all images in one JPEGImages/ folder and indexes subsets via
-train2017.json / test2017.json. We map train->train2017, valid/test->test2017,
-copy each split's JSON as _annotations.coco.json, and symlink just the images
-that split references. RF-DETR auto-detects num_classes and remaps category IDs,
-so HRSID's category_id=1 needs no special handling.
-"""
 import argparse
 import json
 import os
 import shutil
 from pathlib import Path
-
 
 def build_split(split_dir: Path, ann_path: Path, img_src: Path, link: bool):
     split_dir.mkdir(parents=True, exist_ok=True)
@@ -46,7 +30,6 @@ def build_split(split_dir: Path, ann_path: Path, img_src: Path, link: bool):
     print(f"  {split_dir.name}: {len(coco['images'])} images "
           f"({missing} missing), {len(coco['annotations'])} annotations")
 
-
 def main():
     repo_root = Path(__file__).resolve().parent.parent.parent
     ap = argparse.ArgumentParser()
@@ -70,7 +53,6 @@ def main():
     build_split(out / "valid", test_ann, img_src, link)
     build_split(out / "test", test_ann, img_src, link)
     print(f"\nDone. dataset_dir = {out}")
-
 
 if __name__ == "__main__":
     main()

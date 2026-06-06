@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-"""
-Qualitative figure: random test images with ground truth (green) vs. model
-predictions (red), side by side. Works for RT-DETR (ultralytics) or RF-DETR.
-
-Run on the VM (GPU + the matching venv):
-  python qualitative_samples.py --framework rfdetr --model-cls RFDETRLarge \
-    --resolution 768 --ckpt <ckpt> --n 4 --out qualitative_rfdetr.png
-"""
 import argparse
 import json
 import os
@@ -17,9 +8,8 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from PIL import Image
 
-
 def predict(framework, ckpt, img_path, conf, model_cls, resolution):
-    boxes = []  # list of (x1,y1,x2,y2,score)
+    boxes = []                               
     if framework == "rtdetr":
         from ultralytics import RTDETR
         if not hasattr(predict, "_m"):
@@ -36,7 +26,6 @@ def predict(framework, ckpt, img_path, conf, model_cls, resolution):
         for (x1, y1, x2, y2), s in zip(d.xyxy, d.confidence):
             boxes.append((float(x1), float(y1), float(x2), float(y2), float(s)))
     return boxes
-
 
 def main():
     repo = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -57,7 +46,7 @@ def main():
     gt = defaultdict(list)
     id2img = {im["id"]: im for im in coco["images"]}
     for a in coco["annotations"]:
-        gt[a["image_id"]].append(a["bbox"])  # [x,y,w,h]
+        gt[a["image_id"]].append(a["bbox"])             
 
     random.seed(args.seed)
     ids = random.sample(list(id2img), args.n)
@@ -73,11 +62,11 @@ def main():
         axg, axp = axes[row]
         for ax in (axg, axp):
             ax.imshow(img, cmap="gray"); ax.axis("off")
-        # GT (green)
+
         for (x, y, w, h) in gt[iid]:
             axg.add_patch(patches.Rectangle((x, y), w, h, lw=1.4, edgecolor="lime", facecolor="none"))
         axg.set_title(f"Ground truth ({len(gt[iid])})", fontsize=10)
-        # Predictions (red)
+
         preds = predict(args.framework, args.ckpt, path, args.conf, args.model_cls, args.resolution)
         for (x1, y1, x2, y2, s) in preds:
             axp.add_patch(patches.Rectangle((x1, y1), x2 - x1, y2 - y1, lw=1.4,
@@ -88,7 +77,6 @@ def main():
     plt.tight_layout()
     plt.savefig(args.out, dpi=150, bbox_inches="tight")
     print(f"saved {args.out}")
-
 
 if __name__ == "__main__":
     main()

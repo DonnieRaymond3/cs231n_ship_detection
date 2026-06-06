@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Run ON the GCP VM. Makes a venv and installs RF-DETR + W&B.
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$HOME/cs231n_ship_detection}"
@@ -14,11 +13,8 @@ sudo apt-get install -y python3-venv libgl1 libglib2.0-0
 
 echo "==> venv -> $VENV"
 python3 -m venv "$VENV"
-# shellcheck disable=SC1091
 source "$VENV/bin/activate"
 pip install --upgrade pip
-# [train,loggers] pulls pytorch_lightning + wandb/tensorboard loggers (the bare
-# `rfdetr` install is inference-only and fails at train time without these).
 pip install "rfdetr[train,loggers]" wandb
 
 echo "==> Building HRSID dataset for RF-DETR"

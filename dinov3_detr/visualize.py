@@ -1,13 +1,3 @@
-"""Visualize predictions from the trained DINO+DETR model against COCO boxes.
-
-Examples:
-    # Local, after pulling a checkpoint from Modal.
-    python visualize.py --model-dir outputs --dataset ssdd --index 0 --threshold 0.3
-
-    # HRSID validation image by file name.
-    python visualize.py --model-dir outputs --dataset hrsid-val --file-name P0001_0_800_10190_10990.jpg
-"""
-
 import argparse
 import json
 import os
@@ -17,7 +7,6 @@ from transformers import AutoImageProcessor
 
 from config import DEFAULTS
 from evaluate import load_trained_model, pick_device
-
 
 DATASETS = {
     "hrsid-val": {
@@ -32,7 +21,6 @@ DATASETS = {
     },
 }
 
-
 def load_coco(ann_file):
     with open(ann_file) as f:
         coco = json.load(f)
@@ -40,7 +28,6 @@ def load_coco(ann_file):
     for ann in coco["annotations"]:
         anns_by_image.setdefault(ann["image_id"], []).append(ann)
     return coco, anns_by_image
-
 
 def choose_image(coco, image_id=None, file_name=None, index=0):
     if image_id is not None:
@@ -55,7 +42,6 @@ def choose_image(coco, image_id=None, file_name=None, index=0):
         raise ValueError(f"No image with file_name {file_name}")
     return coco["images"][index]
 
-
 def draw_boxes(draw, boxes, color, label_fn, width=3):
     for i, box in enumerate(boxes):
         x1, y1, x2, y2 = box
@@ -63,7 +49,6 @@ def draw_boxes(draw, boxes, color, label_fn, width=3):
         label = label_fn(i)
         if label:
             draw.text((x1 + 3, max(0, y1 - 12)), label, fill=color)
-
 
 def visualize_prediction(
     model_dir,
@@ -125,7 +110,6 @@ def visualize_prediction(
     print(f"Saved visualization to {output}")
     return output
 
-
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--model-dir", default=DEFAULTS["output_dir"])
@@ -141,7 +125,6 @@ def parse_args():
     p.add_argument("--backbone", default=DEFAULTS["backbone"])
     p.add_argument("--pretrained-detr", default=DEFAULTS["pretrained_detr"])
     return p.parse_args()
-
 
 def main():
     args = parse_args()
@@ -159,7 +142,6 @@ def main():
         backbone=args.backbone,
         pretrained_detr=args.pretrained_detr or None,
     )
-
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import division 
 import os
 import xml.dom.minidom
@@ -12,13 +11,6 @@ font = {'family' : 'Palatino Linotype',
 'size'   : 15,
 }
 
-
-
-
-
-
-
-
 ImgPath = 'JPEGImages_test/'
 AnnoPath = 'Annotations_test/'
 
@@ -30,23 +22,20 @@ for image in imagelist:
     image_pre, ext = os.path.splitext(image)
     imgfile = ImgPath + '/' + image_pre + '.jpg'
     xmlfile = AnnoPath + '/'  + image_pre + '.xml'
-    
+
     im = cv2.imread(imgfile)
-    
+
     DomTree = xml.dom.minidom.parse(xmlfile)
     annotation = DomTree.documentElement
-    
+
     filename = annotation.getElementsByTagName('filename')[0].childNodes[0].data
-    
+
     size = annotation.getElementsByTagName('size')[0]
-    
-    
+
     width = int(size.getElementsByTagName('width')[0].childNodes[0].data)
     height = int(size.getElementsByTagName('height')[0].childNodes[0].data)
     width_list.append(width)
     height_list.append(height)
-    
-    # print('width, height = ', width, height)
 
 max_width = int(np.max(width_list))
 max_height = int(np.max(height_list))
@@ -76,15 +65,14 @@ lines_y = [150, 550]
 
 plt.plot(lines_x, lines_y, c='g')
 
-
-plt.legend((s1, s2, s3, s4, s5, s6), \
-('Image Width, Height', \
+plt.legend((s1, s2, s3, s4, s5, s6),\
+('Image Width, Height',\
 'Image Width, Height | mean    = {}, {}'.format(mean_width, mean_height),
 'Image Width, Height | min       = {}, {}'.format(min_width, min_height),
 'Image Width, Height | max      = {}, {}'.format(max_width, max_height),
 'Image Width, Height | median = {}, {}'.format(median_width, median_height),
 'Image Width, Height | mode    = {}, {}'.format(mode_width, mode_height),
-), \
+),\
 loc='best')
 
 plt.xlim(200, 700)
@@ -98,7 +86,6 @@ plt.show()
 ratio_width_height_list = np.array(width_list) / np.array(height_list)
 print(ratio_width_height_list)
 
-
 max_ratio_width_height = np.max(ratio_width_height_list)
 min_ratio_width_height = np.min(ratio_width_height_list)
 mean_ratio_width_height = np.mean(ratio_width_height_list)
@@ -106,13 +93,12 @@ mean_ratio_width_height = np.mean(ratio_width_height_list)
 print(max_ratio_width_height, min_ratio_width_height)
 
 plt.figure(2)
-# bins = [0.50, 0.75, 1.00, 1.25, 1.50, 1.750, 2.00, 2.25, 2.50, 2.750, 3.00]
 
 arr=plt.hist(ratio_width_height_list, bins=20, color='deepskyblue', edgecolor='w')
 
 for i in range(20):
     plt.text(arr[1][i],arr[0][i], str(int(arr[0][i])))
-    
+
 plt.xlim(0.75, 2.6)
 plt.ylim(0, 300)
 
@@ -120,9 +106,3 @@ plt.xlabel('Ratio between Image Width and Image Height', font)
 plt.ylabel('Number of Images', font)
 plt.savefig('Hist_Image_Width_Height.png', bbox_inches='tight')
 plt.show()
-
-
-
-
-
-

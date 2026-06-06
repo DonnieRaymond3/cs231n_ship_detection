@@ -1,15 +1,5 @@
-"""Train DINOv2/DINOv3 + DETR on HRSID (COCO format).
-
-Examples:
-    python train.py --epochs 12 --batch-size 4
-    python train.py --limit 50 --epochs 1   # quick smoke test
-
-``run_training`` is importable so the Modal app can call it on a GPU.
-"""
-
 import argparse
 import os
-
 
 def run_training(
     backbone,
@@ -32,8 +22,7 @@ def run_training(
     compute_epoch_map=True,
     map_limit=0,
 ):
-    # Heavy deps are imported lazily so this module imports cleanly without a
-    # full ML stack (e.g. for py_compile or on the Modal client side).
+
     import torch
     from transformers import AutoImageProcessor, Trainer, TrainerCallback, TrainingArguments
 
@@ -41,9 +30,6 @@ def run_training(
     from evaluate import evaluate_model_on_coco
     from model import build_model
 
-    # Weights & Biases: the HF Trainer auto-logs train/val loss + lr when
-    # report_to includes "wandb". A shared run id lets the separate evaluation
-    # step attach SSDD metrics to the same run.
     report_to = "none"
     if wandb_project:
         os.environ["WANDB_PROJECT"] = wandb_project
@@ -110,11 +96,9 @@ def run_training(
         save_total_limit=2,
         logging_steps=50,
         dataloader_pin_memory=False,
-        fp16=use_cuda,  # fp16 only on CUDA; CPU/MPS run fp32
+        fp16=use_cuda,                                       
         remove_unused_columns=False,
-        # Custom DINO backbone adapter checkpoints reload cleanly at the end via
-        # trainer.save_model(); avoid a noisy intermediate reload with adapter
-        # key-name warnings.
+
         load_best_model_at_end=False,
         report_to=report_to,
         run_name=wandb_run_name,
@@ -132,7 +116,7 @@ def run_training(
                     ann=val_ann,
                     output_dir=output_dir,
                     threshold=0.0,
-                    label_to_cat=1,  # HRSID category_id for ship.
+                    label_to_cat=1,                               
                     limit=map_limit,
                     batch_size=batch_size,
                     device=next(kwargs["model"].parameters()).device,
@@ -159,7 +143,6 @@ def run_training(
     processor.save_pretrained(output_dir)
     print(f"Saved model + image processor to {output_dir}")
     return output_dir
-
 
 def parse_args():
     from config import DEFAULTS
@@ -189,7 +172,6 @@ def parse_args():
     p.add_argument("--map-limit", type=int, default=0, help="cap val images for per-epoch mAP debugging")
     return p.parse_args()
 
-
 def main():
     args = parse_args()
     run_training(
@@ -213,7 +195,6 @@ def main():
         compute_epoch_map=not args.no_epoch_map,
         map_limit=args.map_limit,
     )
-
 
 if __name__ == "__main__":
     main()

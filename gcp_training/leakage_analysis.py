@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-"""
-Quantify + visualize train/test leakage in HRSID's official split.
-
-HRSID tiles are overlapping 800x800 crops of ~200 large SAR scenes, named
-SCENE_x1_x2_y1_y2.jpg. The official split assigns *tiles* (not scenes) to
-train/test, so tiles from the same scene — often overlapping in pixel space —
-appear in both. This script measures that and draws one scene's tile layout.
-
-Outputs: leakage_figure.png (tile map + summary bar) and printed stats.
-"""
 import argparse
 import json
 import re
@@ -20,7 +9,6 @@ import matplotlib.pyplot as plt
 
 PAT = re.compile(r"(P\d+)_(\d+)_(\d+)_(\d+)_(\d+)$")
 
-
 def parse(fn):
     m = PAT.match(fn.rsplit(".", 1)[0])
     if not m:
@@ -29,12 +17,10 @@ def parse(fn):
     x1, x2, y1, y2 = map(int, m.groups()[1:])
     return s, (x1, x2, y1, y2)
 
-
 def overlap(a, b):
     ax1, ax2, ay1, ay2 = a
     bx1, bx2, by1, by2 = b
     return max(0, min(ax2, bx2) - max(ax1, bx1)) * max(0, min(ay2, by2) - max(ay1, by1))
-
 
 def main():
     repo = Path(__file__).resolve().parent.parent
@@ -69,13 +55,11 @@ def main():
     print(f"train scenes={len(tr_s)} test scenes={len(te_s)} shared={len(shared)}")
     print(f"test tiles overlapping a train tile: {leaked}/{len(tef)} ({pct:.1f}%)")
 
-    # Pick a representative shared scene: many tiles of both splits.
     scene = max(shared, key=lambda s: min(len(tr_s[s]), len(te_s[s])))
 
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(13, 5.5),
                                    gridspec_kw={"width_ratios": [1.4, 1]})
 
-    # Panel A: tile layout for one scene (train=blue, test=red; overlap=purple).
     allw = tr_s[scene] + te_s[scene]
     maxx = max(w[1] for w in allw)
     maxy = max(w[3] for w in allw)
@@ -96,7 +80,6 @@ def main():
                         patches.Patch(color="#C44E52", alpha=0.45, label=f"test ({len(te_s[scene])})")],
                loc="upper right", fontsize=9)
 
-    # Panel B: global leakage bar.
     axB.bar(["leaked", "clean"], [pct, 100 - pct],
             color=["#C44E52", "#55A868"], edgecolor="black")
     axB.set_ylim(0, 100)
@@ -112,7 +95,6 @@ def main():
     plt.tight_layout()
     plt.savefig(args.out, dpi=150, bbox_inches="tight")
     print(f"saved {args.out}")
-
 
 if __name__ == "__main__":
     main()

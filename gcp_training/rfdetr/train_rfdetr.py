@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-Fine-tune RF-DETR (Roboflow, DINOv2 backbone) on HRSID with native W&B logging.
-
-RF-DETR auto-detects num_classes from the dataset and remaps category IDs, and
-has built-in W&B support (wandb=True). Run prep_rfdetr_data.py first.
-"""
 import argparse
 from pathlib import Path
 
@@ -14,7 +7,6 @@ MODELS = {
     "medium": "RFDETRMedium",
     "large": "RFDETRLarge",
 }
-
 
 def main():
     repo_root = Path(__file__).resolve().parent.parent.parent
@@ -76,7 +68,6 @@ def main():
     model.train(**train_kwargs)
 
     print("\nDone. Checkpoints + metrics in:", out_dir)
-
 
 if __name__ == "__main__":
     main()
